@@ -24,6 +24,7 @@ let myproducts;
     const products = await getAllProducts();
      
     myproducts=products;
+    console.log(myproducts);
 })()
 
 app.get('/api/getproducts', (req, res) => {
