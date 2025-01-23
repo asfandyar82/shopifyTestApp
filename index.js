@@ -1,36 +1,24 @@
 // Load environment variables from a .env file.
 require('dotenv').config();
 const app = require('express')();
+const axios = require('axios');
 const PORT = process.env.PORT || 3000;
 const Shopify = require('shopify-api-node');
-const shopify = new Shopify({
-    shopName: process.env.SHOP_NAME,  
-    apiKey: process.env.API_KEY,  
-    password: process.env.API_SECRET  
-});
+ 
+ 
 
-async function getAllProducts(){
+app.get('/api/getproducts', async (req, res) => {
     try {
-        const products = await shopify.product.list(); 
-        return products; 
-    } catch(error) {
-        console.error(error); 
+      const url = `https://${process.env.API_KEY}:${process.env.API_SECRET}@${process.env.SHOP_NAME}/admin/api/2025-01/products.json`;
+      const response = await axios.get(url);
+      res.json(response.data);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: 'Failed to fetch products from Shopify.' });
     }
-}
-let myproducts;
+  });
 
-(async () => {
-    // Get all products.
-    const products = await getAllProducts();
-     
-    myproducts=products;
-    console.log(myproducts);
-})()
-
-app.get('/api/getproducts', (req, res) => {
-     
-    res.status(200).send(myproducts);
-});
+ 
 
 app.get('/', (req, res) => {
     res.status(200).send('test home link ');
