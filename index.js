@@ -24,19 +24,19 @@ app.get('/api/getproducts', async (req, res) => {
   }
 });
 
-app.get('/api/search-products', async (req, res) => {
+app.get('/api/get-products-by-id', async (req, res) => {
 
   //  let search=req.query.title;
 
   //  console.log(search);
-  let title = req.query.title; // Search query from the user
+  let id = req.query.id; // Search query from the user
 
-  if (!title) {
-    return res.status(400).json({ error: "Title parameter is required" });
+  if (!id) {
+    return res.status(400).json({ error: "Id parameter is required" });
   }
   try {
-    const url = `https://${process.env.API_KEY}:${process.env.API_SECRET}@${process.env.SHOP_NAME}/admin/api/2025-01/products.json`;
-    const response = await axios.get(url, { params: { title } });
+    const url = `https://${process.env.API_KEY}:${process.env.API_SECRET}@${process.env.SHOP_NAME}//admin/api/2024-10/products/`+id+`.json`;
+    const response = await axios.get(url);
     res.json(response.data);
   } catch (error) {
     console.error(error.message);
@@ -46,7 +46,7 @@ app.get('/api/search-products', async (req, res) => {
 
 
 app.get('/', (req, res) => {
-  res.status(200).send(`<form action="/api/search-filters" method="POST"> <label for="inputField">Enter Product Name:</label>
+  res.status(200).send(`<form action="/api/search-filters" method="GET"> <label for="inputField">Enter Product Name:</label>
         <input type="text" id="title" name="title" required>
         <button type="submit">Submit</button>
     </form>`);
@@ -58,9 +58,9 @@ const SHOPIFY_GRAPHQL_ENDPOINT = `https://${process.env.SHOP_NAME}/admin/api/202
 app.use(bodyParser.json());
 
 // Search and Discovery API - Example: Querying filters
-app.post("/api/search-filters", async (req, res) => {
+app.get("/api/search-filters", async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title } = req.query;
     const query = `
         {
           products(first: 5, query: "${title}") {
@@ -87,7 +87,7 @@ app.post("/api/search-filters", async (req, res) => {
     );
 
     const products = response.data.data.products.edges.map(edge => ({
-      id: edge.node.id,
+      id: edge.node.id.replaceAll("gid://shopify/Product/", ""),
       title: edge.node.title
     }));
 
